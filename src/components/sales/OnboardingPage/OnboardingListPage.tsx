@@ -1,5 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@apollo/client";
+import {
+  GET_COMPLETED_ONBOARDING_LEADS,
+  GET_NEW_ONBOARDING_LEADS,
+} from "@/graphql/onboardingList.gql";
 
 /* ================= TYPES ================= */
 
@@ -12,35 +17,6 @@ type Lead = {
   mobile: string;
   status: LeadStatus;
 };
-
-/* ================= MOCK DATA ================= */
-
-const newLeads: Lead[] = [
-  {
-    id: "IPK25110061",
-    name: "Karthik Madhu",
-    source: "Walk-in",
-    mobile: "9748271564",
-    status: "NEW",
-  },
-  {
-    id: "IPK25110055",
-    name: "Kishoreganesh Kumar",
-    source: "Referral",
-    mobile: "9597423583",
-    status: "NEW",
-  },
-];
-
-const completedLeads: Lead[] = [
-  {
-    id: "IPK25110021",
-    name: "Arun Kumar",
-    source: "Facebook Ads",
-    mobile: "9876543210",
-    status: "COMPLETED",
-  },
-];
 
 /* ================= PREVIEW MODAL ================= */
 
@@ -160,11 +136,13 @@ function TableCard({
   leads,
   onOnboard,
   onView,
+  loading,
 }: {
   title: string;
   leads: Lead[];
   onOnboard: (lead: Lead) => void;
   onView: (lead: Lead) => void;
+  loading?: boolean;
 }) {
   return (
     <div className="mb-10">
@@ -177,14 +155,28 @@ function TableCard({
         <table className="w-full min-w-[720px] table-fixed text-sm">
           <TableHeader />
           <tbody>
-            {leads.map((lead) => (
-              <LeadRow
-                key={lead.id}
-                lead={lead}
-                onOnboard={() => onOnboard(lead)}
-                onView={() => onView(lead)}
-              />
-            ))}
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                  Loading leads...
+                </td>
+              </tr>
+            ) : leads.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                  No records found.
+                </td>
+              </tr>
+            ) : (
+              leads.map((lead) => (
+                <LeadRow
+                  key={lead.id}
+                  lead={lead}
+                  onOnboard={() => onOnboard(lead)}
+                  onView={() => onView(lead)}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -198,15 +190,72 @@ export default function OnboardingListPage() {
   const navigate = useNavigate();
   const [previewLead, setPreviewLead] = useState<Lead | null>(null);
 
+  const {
+    data: newData,
+    loading: loadingNew,
+    error: errorNew,
+    refetch: refetchNew,
+  } = useQuery(GET_NEW_ONBOARDING_LEADS, { fetchPolicy: "network-only" });
+
+  const {
+    data: completedData,
+    loading: loadingCompleted,
+    error: errorCompleted,
+    refetch: refetchCompleted,
+  } = useQuery(GET_COMPLETED_ONBOARDING_LEADS, { fetchPolicy: "network-only" });
+
+  const newLeads = useMemo<Lead[]>(
+    () =>
+      (newData?.onboardingNewLeads ?? []).map((lead: any) => ({
+        id: lead?.id ?? "-",
+        name: lead?.name ?? "-",
+        source: lead?.source ?? "-",
+        mobile: lead?.mobile ?? "-",
+        status: "NEW",
+      })),
+    [newData],
+  );
+
+  const completedLeads = useMemo<Lead[]>(
+    () =>
+      (completedData?.onboardingCompletedLeads ?? []).map((lead: any) => ({
+        id: lead?.id ?? "-",
+        name: lead?.name ?? "-",
+        source: lead?.source ?? "-",
+        mobile: lead?.mobile ?? "-",
+        status: "COMPLETED",
+      })),
+    [completedData],
+  );
+
+  const handleRefetch = () => {
+    void refetchNew();
+    void refetchCompleted();
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
       <h2 className="text-lg font-semibold mb-6">
         Onboarding List
       </h2>
 
+      {(errorNew || errorCompleted) && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Unable to load onboarding data. Please try again.
+          <button
+            type="button"
+            onClick={handleRefetch}
+            className="ml-3 inline-flex items-center rounded border border-amber-300 px-3 py-1 text-xs font-semibold hover:bg-amber-100"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       <TableCard
         title="New Onboard List"
         leads={newLeads}
+        loading={loadingNew}
         onOnboard={() =>
           navigate("/sales/onboarding/process/client-profile")
         }
@@ -216,6 +265,7 @@ export default function OnboardingListPage() {
       <TableCard
         title="Onboarding Completed"
         leads={completedLeads}
+        loading={loadingCompleted}
         onOnboard={() => {}}
         onView={(lead) => setPreviewLead(lead)}
       />

@@ -67,6 +67,7 @@ function RoleLanding() {
   const role = data.me.role as Role;
 
   if (role === "RM") return <Navigate to="/sales/dashboard" replace />;
+  if (role === "STAFF") return <Navigate to="/sales/dashboard" replace />;
   if (role === "MARKETING") return <Navigate to="/marketing/dashboard" replace />;
   if (role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
 
@@ -103,7 +104,7 @@ export default function App() {
             </Route>
 
             {/* Marketing */}
-            <Route element={<ProtectedRoute allow={["MARKETING", "ADMIN"]} />}>
+            <Route element={<ProtectedRoute allow={["MARKETING", "ADMIN", "STAFF"]} />}>
               <Route path="marketing/dashboard" element={<DigitalHome />} />
               <Route path="marketing/calendar" element={<MarketingEvent />} />
               <Route path="marketing/leads_create" element={<LeadEntry />} />
@@ -111,7 +112,7 @@ export default function App() {
             </Route>
 
             {/* Sales (RM) */}
-            <Route element={<ProtectedRoute allow={["RM", "ADMIN"]} />}>
+            <Route element={<ProtectedRoute allow={["RM", "ADMIN", "STAFF"]} />}>
               <Route path="sales/dashboard" element={<SalesRMDashboard />} />
               <Route path="sales/assigned" element={<Navigate to="/sales/stages" replace />} />
               <Route path="sales/stages" element={<LeadStagesPage />} />

@@ -27,6 +27,12 @@ export default function ProtectedRoute({ children, allow }: Props) {
 
   // Role-gated guard
   if (allow && (!user || !allow.includes(user.role as Role))) {
+    console.error("🚫 Access Denied:", {
+      requiredRoles: allow,
+      userRole: user?.role || "NO_USER",
+      userEmail: user?.email || "NO_EMAIL",
+      path: loc.pathname,
+    });
     return <Navigate to="/unauthorized" replace />;
   }
 

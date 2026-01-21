@@ -208,24 +208,37 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
         }
       }
 
-      const { data } = await client.query<MeQueryResult>({
+      console.log("🔍 Querying ME endpoint...");
+      const { data, errors } = await client.query<MeQueryResult>({
         query: ME,
         fetchPolicy: "network-only",
       });
 
+      if (errors) {
+        console.error("❌ ME query errors:", errors);
+      }
+
       if (data?.me) {
+        const normalizedRole = normalizeRole(data.me.role);
+        console.log("👤 User Profile Loaded:", {
+          email: data.me.email,
+          rawRole: data.me.role,
+          normalizedRole,
+          status: data.me.status,
+        });
         setUser({
           id: data.me.id,
           name: data.me.name,
           email: data.me.email,
-          role: normalizeRole(data.me.role),
+          role: normalizedRole,
           status: data.me.status ?? null,
         });
       } else {
+        console.warn("⚠️ ME query returned no user data. Data:", data);
         setUser(null);
       }
     } catch (error) {
-      console.error("Failed to load authenticated user", error);
+      console.error("❌ Failed to load authenticated user:", error);
       setUser(null);
     } finally {
       // ✅ only end loading after ME completes (or fails)
@@ -238,6 +251,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     const unsubscribe = onIdTokenChanged(auth, async (current) => {
       if (!current) {
         // signed-out → safe to end loading immediately
+        console.log("🔓 User signed out, clearing state");
         setFirebaseUser(null);
         setIdToken(null);
         setUser(null);
@@ -245,14 +259,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
         return;
       }
 
+      console.log("🔐 Firebase user detected, fetching token...");
       setLoading(true); // keep guard in loading while we fetch token + ME
       setFirebaseUser(current);
 
       try {
         const token = await current.getIdToken(false);
         setIdToken(token);
-         console.log("🔥 Firebase ID Token:", token);
-        
+        console.log("🔥 Firebase ID Token acquired");
       } catch (error) {
         console.error("Failed to retrieve ID token", error);
         await signOut(auth);

@@ -101,24 +101,11 @@ const adminNav: NavItem[] = [
 ];
 
 function getNav(role?: Role) {
+  // Show only the menus relevant to the signed-in role
   if (role === "RM") return { main: salesNav, others: [] as NavItem[] };
-  if (role === "MARKETING") {
-    return {
-      main: marketingNav,
-      others: [
-        {
-          icon: <PlugInIcon />,
-          name: "Authentication",
-          subItems: [{ name: "Sign In", path: "/signin" }],
-        },
-      ],
-    };
-  }
-  if (role === "ADMIN")
-    return {
-      main: [...adminNav, ...marketingNav, ...salesNav],
-      others: [] as NavItem[],
-    };
+  if (role === "STAFF") return { main: salesNav, others: [] as NavItem[] };
+  if (role === "MARKETING") return { main: marketingNav, others: [] as NavItem[] };
+  if (role === "ADMIN") return { main: adminNav, others: [] as NavItem[] };
   return { main: [] as NavItem[], others: [] as NavItem[] };
 }
 const AppSidebar: React.FC = () => {

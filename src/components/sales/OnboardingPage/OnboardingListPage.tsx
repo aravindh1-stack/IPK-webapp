@@ -61,8 +61,8 @@ function PreviewModal({
 
 function TableHeader() {
   return (
-    <thead className="bg-gray-50 border-b hidden sm:table-header-group">
-      <tr className="text-xs font-semibold text-gray-500 uppercase">
+    <thead className="bg-gray-900 border-b hidden sm:table-header-group">
+      <tr className="text-xs font-semibold text-gray-400 uppercase">
         <th className="px-4 py-3 w-1/6 text-left">Lead ID</th>
         <th className="px-4 py-3 w-1/6 text-left">Name</th>
         <th className="px-4 py-3 w-1/6 text-center">Mobile</th>
@@ -86,27 +86,27 @@ function LeadRow({
   onView: () => void;
 }) {
   return (
-    <tr className="border-b last:border-0 hover:bg-gray-50">
-      <td className="px-4 py-3 font-medium text-left whitespace-nowrap">{lead.id}</td>
+    <tr className="border-b border-gray-700 last:border-0 hover:bg-gray-800">
+      <td className="px-4 py-3 font-medium text-left whitespace-nowrap text-gray-100">{lead.id}</td>
 
       <td className="px-4 py-3 text-left">
-        <div className="font-medium">{lead.name}</div>
-        <div className="text-xs text-gray-400">{lead.source}</div>
+        <div className="font-medium text-gray-100">{lead.name}</div>
+        <div className="text-xs text-gray-500">{lead.source}</div>
       </td>
 
-      <td className="px-4 py-3 text-center whitespace-nowrap">{lead.mobile}</td>
+      <td className="px-4 py-3 text-center whitespace-nowrap text-gray-100">{lead.mobile}</td>
 
       <td className="px-4 py-3 text-center">
         {lead.status === "COMPLETED" ? (
-          <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-900 text-green-300">
             Completed
           </span>
         ) : (
-          <span className="text-gray-400">-</span>
+          <span className="text-gray-500">-</span>
         )}
       </td>
 
-      <td className="px-4 py-3 text-center text-gray-400">-</td>
+      <td className="px-4 py-3 text-center text-gray-500">-</td>
 
       <td className="px-4 py-3 text-center whitespace-nowrap">
         {lead.status === "COMPLETED" ? (
@@ -146,12 +146,12 @@ function TableCard({
 }) {
   return (
     <div className="mb-10">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">
+      <h3 className="text-sm font-semibold text-gray-200 mb-3">
         {title}
       </h3>
 
       {/* ✅ RESPONSIVE WRAPPER */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-x-auto">
+      <div className="bg-gray-900 rounded-xl border border-gray-700 shadow-lg overflow-x-auto">
         <table className="w-full min-w-[720px] table-fixed text-sm">
           <TableHeader />
           <tbody>
@@ -235,12 +235,12 @@ export default function OnboardingListPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-      <h2 className="text-lg font-semibold mb-6">
+      <h2 className="text-lg font-semibold mb-6 text-gray-100">
         Onboarding List
       </h2>
 
       {(errorNew || errorCompleted) && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className="mb-4 rounded-lg border border-amber-700 bg-amber-900/20 px-4 py-3 text-sm text-amber-400">
           Unable to load onboarding data. Please try again.
           <button
             type="button"
